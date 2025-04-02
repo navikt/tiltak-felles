@@ -1,0 +1,17 @@
+/target
+.flattened-pom.xml
+*/target
+*/.flattened-pom.xml
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea/*
+!.idea/codeStyles
