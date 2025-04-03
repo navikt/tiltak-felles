@@ -12,9 +12,7 @@ public record PdlResponseBolk(Data data) {
     public record Data(List<HentPersonBolk> hentPersonBolk) {}
 
     public Map<String, Optional<Diskresjonskode>> utledDiskresjonskoder(Set<String> fnrSet) {
-        List<HentPersonBolk> bolkListe = Optional.ofNullable(data())
-            .flatMap(bolkData -> Optional.ofNullable(bolkData.hentPersonBolk()))
-            .orElse(Collections.emptyList());
+        List<HentPersonBolk> bolkListe = hentPersonBolk();
 
         Map<String, Optional<Diskresjonskode>> diskresjonskodeMap = bolkListe.stream()
             .filter(HentPersonBolk::isOk)
@@ -32,5 +30,11 @@ public record PdlResponseBolk(Data data) {
             fnr -> fnr,
             fnr -> diskresjonskodeMap.getOrDefault(fnr, Optional.empty())
         ));
+    }
+
+    public List<HentPersonBolk> hentPersonBolk() {
+        return Optional.ofNullable(data())
+            .flatMap(bolkData -> Optional.ofNullable(bolkData.hentPersonBolk()))
+            .orElse(Collections.emptyList());
     }
 }

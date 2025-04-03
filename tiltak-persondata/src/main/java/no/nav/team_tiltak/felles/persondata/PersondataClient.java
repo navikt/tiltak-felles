@@ -8,6 +8,8 @@ import no.nav.team_tiltak.felles.persondata.pdl.PdlClient;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlResponse;
 import no.nav.team_tiltak.felles.persondata.utils.MapUtils;
 import okhttp3.OkHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
@@ -18,6 +20,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class PersondataClient {
+    private static final Logger log = LoggerFactory.getLogger(PersondataClient.class);
+
     private final PdlClient pdlClient;
     private final DiskresjonskodeCache diskresjonskodeCache;
 
@@ -44,7 +48,14 @@ public class PersondataClient {
     }
 
     public Diskresjonskode hentDiskresjonskode(String fnr) {
-        return diskresjonskodeCache.get(fnr).orElseGet(() -> {
+        log.info("Henter diskresjonskode fra PDL");
+
+        Optional<Diskresjonskode> diskresjonskodeCacheOpt = diskresjonskodeCache.get(fnr);
+        diskresjonskodeCacheOpt.ifPresent(diskresjonskode -> {
+            log.info("Fant diskresjonskode i PDL-cache");
+        });
+
+        return diskresjonskodeCacheOpt.orElseGet(() -> {
             Optional<Diskresjonskode> diskresjonskodeOpt = pdlClient.hentPersondata(fnr)
                 .flatMap(PdlResponse::utledDiskresjonskode);
             diskresjonskodeCache.putIfPresent(fnr, diskresjonskodeOpt);
@@ -57,6 +68,8 @@ public class PersondataClient {
     }
 
     public <T>Map<T, Diskresjonskode> hentDiskresjonskoder(Set<String> fnrSet, Function<String, T> mapper) {
+        log.info("Henter {} diskresjonskoder fra PDL", fnrSet.size());
+
         if (fnrSet.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -70,9 +83,19 @@ public class PersondataClient {
             .collect(Collectors.toSet());
 
         if (fnrSomIkkeFinnesICache.isEmpty()) {
+            log.info(
+                "Fikk treff på alle {} av {} personer i PDL-cache",
+                diskresjonskoderFraCache.size(),
+                fnrSet.size()
+            );
             return MapUtils.mapKeys(diskresjonskoderFraCache, mapper);
         }
 
+        log.info(
+            "Fikk treff på {} av {} personer i cache - henter resten fra PDL",
+            fnrSomIkkeFinnesICache.size(),
+            fnrSet.size()
+        );
         Map<String, Optional<Diskresjonskode>> diskresjonskodeOptFraPdl = pdlClient
             .hentPersonBolk(fnrSomIkkeFinnesICache)
             .map(bolk -> bolk.utledDiskresjonskoder(fnrSomIkkeFinnesICache))
@@ -94,14 +117,17 @@ public class PersondataClient {
     }
 
     public Optional<String> hentGjeldendeAktorId(String fnr) {
+        log.info("Henter aktør-id fra PDL");
         return pdlClient.hentPersondata(fnr).flatMap(PdlResponse::utledGjeldendeIdent);
     }
 
     public Optional<String> hentGeografiskTilknytning(String fnr) {
+        log.info("Henter geografisk tilknytning fra PDL");
         return pdlClient.hentPersondata(fnr).flatMap(PdlResponse::utledGeoLokasjon);
     }
 
     public Navn hentNavn(String fnr) {
+        log.info("Henter navn fra PDL");
         return pdlClient.hentPersondata(fnr).flatMap(PdlResponse::utledNavn).orElse(Navn.TOMT_NAVN);
     }
 
