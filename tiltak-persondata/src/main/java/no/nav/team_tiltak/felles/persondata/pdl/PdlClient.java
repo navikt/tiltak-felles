@@ -3,11 +3,11 @@ package no.nav.team_tiltak.felles.persondata.pdl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kotlin._Assertions;
 import no.nav.team_tiltak.felles.persondata.cache.PdlResponseCache;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlRequest;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlResponse;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlResponseBolk;
+import no.nav.team_tiltak.felles.persondata.utils.ResourceUtil;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
@@ -29,44 +28,37 @@ public class PdlClient {
     private final OkHttpClient httpClient;
     private final PdlResponseCache pdlResponseCache;
     private final String baseUrl;
-    private final URL hentPersondataResource;
-    private final URL hentPersonBolkResource;
+    private final String hentPersondataQuery;
+    private final String hentPersonBolkQuery;
     private final Supplier<String> tokenProvider;
     private final ObjectMapper objectMapper = new ObjectMapper()
         .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     public PdlClient(String baseUrl, OkHttpClient httpClient, Supplier<String> tokenProvider) {
-        ClassLoader classLoader = getClass().getClassLoader();
-
         this.baseUrl = baseUrl;
         this.httpClient = httpClient;
         this.tokenProvider = tokenProvider;
-        this.hentPersonBolkResource = classLoader.getResource("pdl/hentPersonBolk.graphql");
-        this.hentPersondataResource = classLoader.getResource("pdl/hentPersondata.graphql");
         this.pdlResponseCache = new PdlResponseCache();
+        this.hentPersonBolkQuery = ResourceUtil.getResourceAsString(this, "/pdl/hentPersonBolk.graphql");
+        this.hentPersondataQuery = ResourceUtil.getResourceAsString(this, "/pdl/hentPersondata.graphql");
     }
 
     public Optional<PdlResponseBolk> hentPersonBolk(Set<String> fnr) {
-        try {
-            log.info("Henter {} personer i bolk fra PDL", fnr.size());
-            PdlRequest<PdlRequest.BolkVariables> pdlRequest = PdlRequest.av(
-                hentPersonBolkResource,
-                new PdlRequest.BolkVariables(new ArrayList<>(fnr))
-            );
+        log.info("Henter {} personer i bolk fra PDL", fnr.size());
+        PdlRequest<PdlRequest.BolkVariables> pdlRequest = new PdlRequest<>(
+            hentPersonBolkQuery,
+            new PdlRequest.BolkVariables(new ArrayList<>(fnr))
+        );
 
-            Optional<PdlResponseBolk> pdlResponseOpt = post(baseUrl, pdlRequest, PdlResponseBolk.class);
-            log.info(
-                pdlResponseOpt
-                    .filter(response -> !response.hentPersonBolk().isEmpty())
-                    .map(response -> "Fikk svar på " + response.hentPersonBolk().size() + " ved henting av personer i bolk")
-                    .orElse("Svar fra PDL var tomt ved henting av personer i bolk")
-            );
-            return pdlResponseOpt;
-        } catch (IOException io) {
-            log.error("Feil ved henting av GraphQL spørring", io);
-            return Optional.empty();
-        }
+        Optional<PdlResponseBolk> pdlResponseOpt = post(baseUrl, pdlRequest, PdlResponseBolk.class);
+        log.info(
+            pdlResponseOpt
+                .filter(response -> !response.hentPersonBolk().isEmpty())
+                .map(response -> "Fikk svar på " + response.hentPersonBolk().size() + " ved henting av personer i bolk")
+                .orElse("Svar fra PDL var tomt ved henting av personer i bolk")
+        );
+        return pdlResponseOpt;
     }
 
     public Optional<PdlResponse> hentPersondata(String fnr) {
@@ -76,25 +68,20 @@ public class PdlClient {
             return cached;
         }
 
-        try {
-            log.info("Henter person fra PDL");
-            PdlRequest<PdlRequest.Variables> pdlRequest = PdlRequest.av(
-                hentPersondataResource,
-                new PdlRequest.Variables(fnr)
-            );
+        log.info("Henter person fra PDL");
+        PdlRequest<PdlRequest.Variables> pdlRequest = new PdlRequest<>(
+            hentPersondataQuery,
+            new PdlRequest.Variables(fnr)
+        );
 
-            Optional<PdlResponse> pdlResponseOpt = post(baseUrl, pdlRequest, PdlResponse.class);
-            pdlResponseOpt.ifPresent(Response -> pdlResponseCache.put(fnr, Response));
-            log.info(
-                pdlResponseOpt
-                    .map(response -> "Hentet person fra PDL")
-                    .orElse("Svar fra PDL var tomt ved henting av person")
-            );
-            return pdlResponseOpt;
-        } catch (IOException io) {
-            log.error("Feil ved henting av GraphQL spørring", io);
-            return Optional.empty();
-        }
+        Optional<PdlResponse> pdlResponseOpt = post(baseUrl, pdlRequest, PdlResponse.class);
+        pdlResponseOpt.ifPresent(Response -> pdlResponseCache.put(fnr, Response));
+        log.info(
+            pdlResponseOpt
+                .map(response -> "Hentet person fra PDL")
+                .orElse("Svar fra PDL var tomt ved henting av person")
+        );
+        return pdlResponseOpt;
     }
 
     private <T, R> Optional<R> post(String url, PdlRequest<T> pdlRequest, Class<R> responseType) {

@@ -93,7 +93,7 @@ public class PersondataClient {
 
         log.info(
             "Fikk treff på {} av {} personer i cache - henter resten fra PDL",
-            fnrSomIkkeFinnesICache.size(),
+            diskresjonskoderFraCache.size(),
             fnrSet.size()
         );
         Map<String, Optional<Diskresjonskode>> diskresjonskodeOptFraPdl = pdlClient
