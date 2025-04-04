@@ -51,9 +51,7 @@ public class PersondataClient {
         log.info("Henter diskresjonskode fra PDL");
 
         Optional<Diskresjonskode> diskresjonskodeCacheOpt = diskresjonskodeCache.get(fnr);
-        diskresjonskodeCacheOpt.ifPresent(diskresjonskode -> {
-            log.info("Fant diskresjonskode i PDL-cache");
-        });
+        diskresjonskodeCacheOpt.ifPresent(diskresjonskode -> log.info("Fant diskresjonskode fra PDL i cache"));
 
         return diskresjonskodeCacheOpt.orElseGet(() -> {
             Optional<Diskresjonskode> diskresjonskodeOpt = pdlClient.hentPersondata(fnr)
@@ -84,18 +82,12 @@ public class PersondataClient {
 
         if (fnrSomIkkeFinnesICache.isEmpty()) {
             log.info(
-                "Fikk treff på alle {} av {} personer i PDL-cache",
-                diskresjonskoderFraCache.size(),
-                fnrSet.size()
+                "Fant {} diskresjonskoder fra PDL i cache",
+                diskresjonskoderFraCache.size()
             );
             return MapUtils.mapKeys(diskresjonskoderFraCache, mapper);
         }
 
-        log.info(
-            "Fikk treff på {} av {} personer i cache - henter resten fra PDL",
-            diskresjonskoderFraCache.size(),
-            fnrSet.size()
-        );
         Map<String, Optional<Diskresjonskode>> diskresjonskodeOptFraPdl = pdlClient
             .hentPersonBolk(fnrSomIkkeFinnesICache)
             .map(bolk -> bolk.utledDiskresjonskoder(fnrSomIkkeFinnesICache))
@@ -109,6 +101,19 @@ public class PersondataClient {
                 Map.Entry::getKey,
                 entry -> entry.getValue().orElse(Diskresjonskode.UGRADERT)
             ));
+
+        if (diskresjonskoderFraCache.isEmpty()) {
+            log.info(
+                "Hentet {} diskresjonskoder fra PDL",
+                diskresjonskodeFraPdl.size()
+            );
+        } else {
+            log.info(
+                "Fant {} diskresjonskoder i cache og {} ble hentet fra PDL",
+                diskresjonskoderFraCache.size(),
+                diskresjonskodeFraPdl.size()
+            );
+        }
 
         return MapUtils.mapKeys(
             MapUtils.concat(diskresjonskoderFraCache, diskresjonskodeFraPdl),

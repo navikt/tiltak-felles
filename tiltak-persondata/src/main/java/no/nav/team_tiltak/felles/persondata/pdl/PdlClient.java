@@ -45,18 +45,17 @@ public class PdlClient {
     }
 
     public Optional<PdlResponseBolk> hentPersonBolk(Set<String> fnr) {
-        log.info("Henter {} personer i bolk fra PDL", fnr.size());
         PdlRequest<PdlRequest.BolkVariables> pdlRequest = new PdlRequest<>(
             hentPersonBolkQuery,
             new PdlRequest.BolkVariables(new ArrayList<>(fnr))
         );
 
         Optional<PdlResponseBolk> pdlResponseOpt = post(baseUrl, pdlRequest, PdlResponseBolk.class);
-        log.info(
+        log.debug(
             pdlResponseOpt
                 .filter(response -> !response.hentPersonBolk().isEmpty())
-                .map(response -> "Fikk svar på " + response.hentPersonBolk().size() + " ved henting av personer i bolk")
-                .orElse("Svar fra PDL var tomt ved henting av personer i bolk")
+                .map(response -> "Hentet " + response.hentPersonBolk().size() + " persondata fra PDL")
+                .orElse("Svar fra PDL var tomt")
         );
         return pdlResponseOpt;
     }
@@ -64,11 +63,10 @@ public class PdlClient {
     public Optional<PdlResponse> hentPersondata(String fnr) {
         Optional<PdlResponse> cached = Optional.ofNullable(pdlResponseCache.getIfPresent(fnr));
         if (cached.isPresent()) {
-            log.info("Henter person fra PDL-cache");
+            log.info("Fant persondata fra PDL i cache");
             return cached;
         }
 
-        log.info("Henter person fra PDL");
         PdlRequest<PdlRequest.Variables> pdlRequest = new PdlRequest<>(
             hentPersondataQuery,
             new PdlRequest.Variables(fnr)
@@ -78,8 +76,8 @@ public class PdlClient {
         pdlResponseOpt.ifPresent(Response -> pdlResponseCache.put(fnr, Response));
         log.info(
             pdlResponseOpt
-                .map(response -> "Hentet person fra PDL")
-                .orElse("Svar fra PDL var tomt ved henting av person")
+                .map(response -> "Hentet persondata fra PDL")
+                .orElse("Svar fra PDL var tomt")
         );
         return pdlResponseOpt;
     }
