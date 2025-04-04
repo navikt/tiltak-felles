@@ -104,7 +104,7 @@ public class PersondataClient {
 
         if (diskresjonskoderFraCache.isEmpty()) {
             log.info(
-                "Hentet {} diskresjonskoder fra PDL",
+                "{} diskresjonskoder hentet fra PDL",
                 diskresjonskodeFraPdl.size()
             );
         } else {

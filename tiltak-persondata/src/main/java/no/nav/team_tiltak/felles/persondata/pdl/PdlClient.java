@@ -76,7 +76,7 @@ public class PdlClient {
         pdlResponseOpt.ifPresent(Response -> pdlResponseCache.put(fnr, Response));
         log.info(
             pdlResponseOpt
-                .map(response -> "Hentet persondata fra PDL")
+                .map(response -> "Persondata hentet fra PDL")
                 .orElse("Svar fra PDL var tomt")
         );
         return pdlResponseOpt;
@@ -100,7 +100,11 @@ public class PdlClient {
                     log.warn("Ingen respons fra PDL");
                     return Optional.empty();
                 }
-                return Optional.ofNullable(objectMapper.readValue(response.body().string(), responseType));
+                Optional<R> responseOpt = Optional.ofNullable(
+                    objectMapper.readValue(response.body().string(), responseType)
+                );
+                responseOpt.ifPresent(r -> log.debug("Respons fra PDL: {}", r));
+                return responseOpt;
             } catch (IOException e) {
                 log.error("Feil fra PDL", e);
                 return Optional.empty();
