@@ -103,7 +103,7 @@ public class PdlClient {
                 Optional<R> responseOpt = Optional.ofNullable(
                     objectMapper.readValue(response.body().string(), responseType)
                 );
-                responseOpt.ifPresent(r -> log.debug("Respons fra PDL: {}", r));
+                log.debug("Respons fra PDL: {}", response.body().string());
                 return responseOpt;
             } catch (IOException e) {
                 log.error("Feil fra PDL", e);

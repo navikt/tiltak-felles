@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -80,27 +81,27 @@ class PersondataClientCacheTest {
 
     @Test
     void hentDiskresjonskode__skal_kun_hente_fra_klient_1_gang() {
-        Diskresjonskode diskresjonskode = persondataClient.hentDiskresjonskode(STRENG_FORTROLIG_FNR);
-        assertEquals(Diskresjonskode.STRENGT_FORTROLIG, diskresjonskode);
+        Optional<Diskresjonskode> diskresjonskode = persondataClient.hentDiskresjonskode(STRENG_FORTROLIG_FNR);
+        assertThat(diskresjonskode).hasValue(Diskresjonskode.STRENGT_FORTROLIG);
 
-        Diskresjonskode diskresjonskode2 = persondataClient.hentDiskresjonskode(STRENG_FORTROLIG_FNR);
-        assertEquals(Diskresjonskode.STRENGT_FORTROLIG, diskresjonskode2);
+        Optional<Diskresjonskode> diskresjonskode2 = persondataClient.hentDiskresjonskode(STRENG_FORTROLIG_FNR);
+        assertThat(diskresjonskode2).hasValue(Diskresjonskode.STRENGT_FORTROLIG);
 
         verify(pdlClient, times(1)).hentPersondata(any());
     }
 
     @Test
     void hentDiskresjonskoder_henter_bare_de_som_mangler_i_cache() {
-        Diskresjonskode diskresjonskode = persondataClient.hentDiskresjonskode(STRENG_FORTROLIG_FNR);
-        assertEquals(Diskresjonskode.STRENGT_FORTROLIG, diskresjonskode);
+        Optional<Diskresjonskode> diskresjonskode = persondataClient.hentDiskresjonskode(STRENG_FORTROLIG_FNR);
+        assertThat(diskresjonskode).hasValue(Diskresjonskode.STRENGT_FORTROLIG);
 
-        Map<String, Diskresjonskode> diskresjonskodeMap = persondataClient.hentDiskresjonskoder(
+        Map<String, Optional<Diskresjonskode>> diskresjonskodeMap = persondataClient.hentDiskresjonskoder(
             Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR)
         );
 
-        assertEquals(Diskresjonskode.STRENGT_FORTROLIG, diskresjonskodeMap.get(STRENG_FORTROLIG_FNR));
-        assertEquals(Diskresjonskode.FORTROLIG, diskresjonskodeMap.get(FORTROLIG_FNR));
-        assertEquals(Diskresjonskode.UGRADERT, diskresjonskodeMap.get(UGRADERT_FNR));
+        assertThat(diskresjonskodeMap.get(STRENG_FORTROLIG_FNR)).hasValue(Diskresjonskode.STRENGT_FORTROLIG);
+        assertThat(diskresjonskodeMap.get(FORTROLIG_FNR)).hasValue(Diskresjonskode.FORTROLIG);
+        assertThat(diskresjonskodeMap.get(UGRADERT_FNR)).hasValue(Diskresjonskode.UGRADERT);
 
         verify(pdlClient, times(1)).hentPersondata(STRENG_FORTROLIG_FNR);
         verify(pdlClient, times(1)).hentPersonBolk(Set.of(FORTROLIG_FNR, UGRADERT_FNR));
@@ -108,48 +109,46 @@ class PersondataClientCacheTest {
 
     @Test
     void hentDiskresjonskode_henter_bare_dersom_det_mangler_i_cache() {
-        Map<String, Diskresjonskode> diskresjonskodeMap = persondataClient.hentDiskresjonskoder(
+        Map<String, Optional<Diskresjonskode>> diskresjonskodeMap = persondataClient.hentDiskresjonskoder(
             Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR)
         );
 
-        assertEquals(Diskresjonskode.STRENGT_FORTROLIG, diskresjonskodeMap.get(STRENG_FORTROLIG_FNR));
-        assertEquals(Diskresjonskode.FORTROLIG, diskresjonskodeMap.get(FORTROLIG_FNR));
-        assertEquals(Diskresjonskode.UGRADERT, diskresjonskodeMap.get(UGRADERT_FNR));
+        assertThat(diskresjonskodeMap.get(STRENG_FORTROLIG_FNR)).hasValue(Diskresjonskode.STRENGT_FORTROLIG);
+        assertThat(diskresjonskodeMap.get(FORTROLIG_FNR)).hasValue(Diskresjonskode.FORTROLIG);
+        assertThat(diskresjonskodeMap.get(UGRADERT_FNR)).hasValue(Diskresjonskode.UGRADERT);
 
-        Diskresjonskode diskresjonskode = persondataClient.hentDiskresjonskode(FORTROLIG_FNR);
-        assertEquals(Diskresjonskode.FORTROLIG, diskresjonskode);
+        Optional<Diskresjonskode> diskresjonskode = persondataClient.hentDiskresjonskode(FORTROLIG_FNR);
+        assertEquals(Diskresjonskode.FORTROLIG, diskresjonskode.orElse(null));
 
         verify(pdlClient, never()).hentPersondata(any());
         verify(pdlClient, times(1)).hentPersonBolk(Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR));
     }
 
     @Test
-    void hentDiskresjonskode_lagrer_ikke_i_cache_og_defaulter_til_UGRADERT_dersom_respons_fra_pdl_er_tom() {
-        Diskresjonskode diskresjonskode = persondataClient.hentDiskresjonskode(TOM_RESPONS_FNR);
-        assertEquals(Diskresjonskode.UGRADERT, diskresjonskode);
+    void hentDiskresjonskode_lagrer_ikke_i_cache_dersom_respons_fra_pdl_er_tom() {
+        Optional<Diskresjonskode> diskresjonskode = persondataClient.hentDiskresjonskode(TOM_RESPONS_FNR);
+        assertThat(diskresjonskode).isEmpty();
 
-        Diskresjonskode diskresjonskode2 = persondataClient.hentDiskresjonskode(TOM_RESPONS_FNR);
-        assertEquals(Diskresjonskode.UGRADERT, diskresjonskode2);
+        Optional<Diskresjonskode> diskresjonskode2 = persondataClient.hentDiskresjonskode(TOM_RESPONS_FNR);
+        assertThat(diskresjonskode2).isEmpty();
 
         verify(pdlClient, times(2)).hentPersondata(any());
     }
 
     @Test
     void hentDiskresjonskoder_lagrer_ikke_i_cache_og_defaulter_til_UGRADERT_dersom_respons_fra_pdl_er_tom() {
-        Map<String, Diskresjonskode> diskresjonskodeMap = persondataClient.hentDiskresjonskoder(
+        Map<String, Optional<Diskresjonskode>> diskresjonskodeMap = persondataClient.hentDiskresjonskoder(
             Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR, TOM_RESPONS_FNR)
         );
 
-        assertEquals(Diskresjonskode.STRENGT_FORTROLIG, diskresjonskodeMap.get(STRENG_FORTROLIG_FNR));
-        assertEquals(Diskresjonskode.FORTROLIG, diskresjonskodeMap.get(FORTROLIG_FNR));
-        assertEquals(Diskresjonskode.UGRADERT, diskresjonskodeMap.get(UGRADERT_FNR));
-        assertEquals(Diskresjonskode.UGRADERT, diskresjonskodeMap.get(TOM_RESPONS_FNR));
+        assertThat(diskresjonskodeMap.get(STRENG_FORTROLIG_FNR)).hasValue(Diskresjonskode.STRENGT_FORTROLIG);
+        assertThat(diskresjonskodeMap.get(FORTROLIG_FNR)).hasValue(Diskresjonskode.FORTROLIG);
+        assertThat(diskresjonskodeMap.get(UGRADERT_FNR)).hasValue(Diskresjonskode.UGRADERT);
+        assertThat(diskresjonskodeMap.get(TOM_RESPONS_FNR)).hasValue(Diskresjonskode.UGRADERT);
 
-        verify(pdlClient, times(1))
-            .hentPersonBolk(Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR, TOM_RESPONS_FNR));
-
-        Map<String, Diskresjonskode> diskresjonskodeMap2 = persondataClient.hentDiskresjonskoder(
-            Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR, TOM_RESPONS_FNR)
+        Map<String, Diskresjonskode> diskresjonskodeMap2 = persondataClient.hentDiskresjonskoderEllerDefault(
+            Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR, TOM_RESPONS_FNR),
+            Diskresjonskode.UGRADERT
         );
 
         assertEquals(Diskresjonskode.STRENGT_FORTROLIG, diskresjonskodeMap2.get(STRENG_FORTROLIG_FNR));
@@ -157,7 +156,8 @@ class PersondataClientCacheTest {
         assertEquals(Diskresjonskode.UGRADERT, diskresjonskodeMap2.get(UGRADERT_FNR));
         assertEquals(Diskresjonskode.UGRADERT, diskresjonskodeMap2.get(TOM_RESPONS_FNR));
 
-        verify(pdlClient, times(1)).hentPersonBolk(Set.of(TOM_RESPONS_FNR));
+        verify(pdlClient, times(1))
+            .hentPersonBolk(Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR, TOM_RESPONS_FNR));
     }
 
 }

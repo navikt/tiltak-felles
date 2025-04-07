@@ -14,21 +14,22 @@ public record PdlResponseBolk(Data data) {
     public Map<String, Optional<Diskresjonskode>> utledDiskresjonskoder(Set<String> fnrSet) {
         List<HentPersonBolk> bolkListe = hentPersonBolk();
 
-        Map<String, Optional<Diskresjonskode>> diskresjonskodeMap = bolkListe.stream()
+        Map<String, Diskresjonskode> diskresjonskodeMap = bolkListe.stream()
             .filter(HentPersonBolk::isOk)
             .map(bolk -> Map.entry(
                 bolk.ident(),
-                PdlResponse.utledAdressebeskyttelse(bolk.person()).map(Adressebeskyttelse::gradering)
+                PdlResponse.utledAdressebeskyttelse(bolk.person())
+                    .map(Adressebeskyttelse::gradering)
+                    .orElse(Diskresjonskode.UGRADERT)
             ))
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                Map.Entry::getValue,
-                (a, b) -> a.isEmpty() ? b : a
+                Map.Entry::getValue
             ));
 
         return fnrSet.stream().collect(Collectors.toMap(
             fnr -> fnr,
-            fnr -> diskresjonskodeMap.getOrDefault(fnr, Optional.empty())
+            fnr -> Optional.ofNullable(diskresjonskodeMap.get(fnr))
         ));
     }
 
