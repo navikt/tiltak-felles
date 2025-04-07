@@ -100,10 +100,11 @@ public class PdlClient {
                     log.warn("Ingen respons fra PDL");
                     return Optional.empty();
                 }
+                String body = response.body().string();
                 Optional<R> responseOpt = Optional.ofNullable(
-                    objectMapper.readValue(response.body().string(), responseType)
+                    objectMapper.readValue(body, responseType)
                 );
-                log.debug("Respons fra PDL: {}", response.body().string());
+                log.debug("Respons fra PDL: {}", body);
                 return responseOpt;
             } catch (IOException e) {
                 log.error("Feil fra PDL", e);
