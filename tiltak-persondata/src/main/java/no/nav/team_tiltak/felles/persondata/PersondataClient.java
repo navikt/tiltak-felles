@@ -2,9 +2,9 @@ package no.nav.team_tiltak.felles.persondata;
 
 import no.nav.common.rest.client.RestClient;
 import no.nav.team_tiltak.felles.persondata.cache.DiskresjonskodeCache;
+import no.nav.team_tiltak.felles.persondata.pdl.PdlClient;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.Diskresjonskode;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.Navn;
-import no.nav.team_tiltak.felles.persondata.pdl.PdlClient;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlResponse;
 import no.nav.team_tiltak.felles.persondata.utils.MapUtils;
 import okhttp3.OkHttpClient;
@@ -57,10 +57,17 @@ public class PersondataClient {
             return diskresjonskodeCacheOpt;
         }
 
-        Optional<Diskresjonskode> diskresjonskodeOpt = pdlClient.hentPersondata(fnr)
-            .flatMap(PdlResponse::utledDiskresjonskode);
-        diskresjonskodeCache.putIfPresent(fnr, diskresjonskodeOpt);
-        return diskresjonskodeOpt;
+        Optional<PdlResponse> pdlResponseOpt = pdlClient.hentPersondata(fnr);
+        if (pdlResponseOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Diskresjonskode diskresjonskode = pdlResponseOpt
+            .flatMap(PdlResponse::utledDiskresjonskode)
+            .orElse(Diskresjonskode.UGRADERT);
+
+        diskresjonskodeCache.put(fnr, diskresjonskode);
+        return Optional.of(diskresjonskode);
     }
 
     public Map<String, Diskresjonskode> hentDiskresjonskoderEllerDefault(
