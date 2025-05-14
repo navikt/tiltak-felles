@@ -46,6 +46,7 @@ class PersondataClientCacheTest {
         Collections.emptyList(),
         null
     );
+    private static String INGEN_RESPONS_FNR = "00000000004";
 
     private PersondataClient persondataClient;
     private PdlClient pdlClient;
@@ -61,6 +62,10 @@ class PersondataClientCacheTest {
 
         when(pdlClient.hentPersondata(TOM_RESPONS_FNR)).thenReturn(
             Optional.of(new PdlResponse(new PdlResponse.Data(TOM_RESPONS_PERSON, null, null)))
+        );
+
+        when(pdlClient.hentPersondata(INGEN_RESPONS_FNR)).thenReturn(
+            Optional.empty()
         );
 
         when(pdlClient.hentPersonBolk(any())).thenReturn(
@@ -125,18 +130,29 @@ class PersondataClientCacheTest {
     }
 
     @Test
-    void hentDiskresjonskode_lagrer_ikke_i_cache_dersom_respons_fra_pdl_er_tom() {
-        Optional<Diskresjonskode> diskresjonskode = persondataClient.hentDiskresjonskode(TOM_RESPONS_FNR);
+    void hentDiskresjonskode_lagrer_ikke_i_cache_og_er_tom_dersom_pdl_ikke_har_noen_respons() {
+        Optional<Diskresjonskode> diskresjonskode = persondataClient.hentDiskresjonskode(INGEN_RESPONS_FNR);
         assertThat(diskresjonskode).isEmpty();
 
-        Optional<Diskresjonskode> diskresjonskode2 = persondataClient.hentDiskresjonskode(TOM_RESPONS_FNR);
+        Optional<Diskresjonskode> diskresjonskode2 = persondataClient.hentDiskresjonskode(INGEN_RESPONS_FNR);
         assertThat(diskresjonskode2).isEmpty();
 
-        verify(pdlClient, times(2)).hentPersondata(any());
+        verify(pdlClient, times(2)).hentPersondata(INGEN_RESPONS_FNR);
     }
 
     @Test
-    void hentDiskresjonskoder_lagrer_ikke_i_cache_og_defaulter_til_UGRADERT_dersom_respons_fra_pdl_er_tom() {
+    void hentDiskresjonskode_defaulter_til_UGRADERT_dersom_respons_fra_pdl_er_tom() {
+        Optional<Diskresjonskode> diskresjonskode = persondataClient.hentDiskresjonskode(TOM_RESPONS_FNR);
+        assertThat(diskresjonskode).hasValue(Diskresjonskode.UGRADERT);
+
+        Optional<Diskresjonskode> diskresjonskode2 = persondataClient.hentDiskresjonskode(TOM_RESPONS_FNR);
+        assertThat(diskresjonskode2).hasValue(Diskresjonskode.UGRADERT);
+
+        verify(pdlClient, times(1)).hentPersondata(TOM_RESPONS_FNR);
+    }
+
+    @Test
+    void hentDiskresjonskoder_defaulter_til_UGRADERT_dersom_respons_fra_pdl_er_tom() {
         Map<String, Optional<Diskresjonskode>> diskresjonskodeMap = persondataClient.hentDiskresjonskoder(
             Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR, TOM_RESPONS_FNR)
         );
@@ -158,6 +174,36 @@ class PersondataClientCacheTest {
 
         verify(pdlClient, times(1))
             .hentPersonBolk(Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR, TOM_RESPONS_FNR));
+    }
+
+    @Test
+    void hentDiskresjonskoder_lagrer_ikke_i_cache_og_er_tom_dersom_pdl_ikke_har_noen_respons() {
+        Map<String, Optional<Diskresjonskode>> diskresjonskodeMap = persondataClient.hentDiskresjonskoder(
+            Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR, TOM_RESPONS_FNR, INGEN_RESPONS_FNR)
+        );
+
+        assertThat(diskresjonskodeMap.get(STRENG_FORTROLIG_FNR)).hasValue(Diskresjonskode.STRENGT_FORTROLIG);
+        assertThat(diskresjonskodeMap.get(FORTROLIG_FNR)).hasValue(Diskresjonskode.FORTROLIG);
+        assertThat(diskresjonskodeMap.get(UGRADERT_FNR)).hasValue(Diskresjonskode.UGRADERT);
+        assertThat(diskresjonskodeMap.get(TOM_RESPONS_FNR)).hasValue(Diskresjonskode.UGRADERT);
+        assertThat(diskresjonskodeMap.get(INGEN_RESPONS_FNR)).isEmpty();
+
+        Map<String, Diskresjonskode> diskresjonskodeMap2 = persondataClient.hentDiskresjonskoderEllerDefault(
+            Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR, TOM_RESPONS_FNR, INGEN_RESPONS_FNR),
+            Diskresjonskode.UGRADERT
+        );
+
+        assertEquals(Diskresjonskode.STRENGT_FORTROLIG, diskresjonskodeMap2.get(STRENG_FORTROLIG_FNR));
+        assertEquals(Diskresjonskode.FORTROLIG, diskresjonskodeMap2.get(FORTROLIG_FNR));
+        assertEquals(Diskresjonskode.UGRADERT, diskresjonskodeMap2.get(UGRADERT_FNR));
+        assertEquals(Diskresjonskode.UGRADERT, diskresjonskodeMap2.get(TOM_RESPONS_FNR));
+        assertEquals(Diskresjonskode.UGRADERT, diskresjonskodeMap2.get(INGEN_RESPONS_FNR));
+
+        verify(pdlClient, times(1))
+            .hentPersonBolk(Set.of(STRENG_FORTROLIG_FNR, FORTROLIG_FNR, UGRADERT_FNR, TOM_RESPONS_FNR, INGEN_RESPONS_FNR));
+
+        verify(pdlClient, times(1))
+            .hentPersonBolk(Set.of(INGEN_RESPONS_FNR));
     }
 
 }

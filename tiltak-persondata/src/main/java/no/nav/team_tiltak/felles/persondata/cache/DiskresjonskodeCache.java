@@ -38,7 +38,7 @@ public class DiskresjonskodeCache {
         diskresjonskodeOpt.ifPresent(diskresjonskode -> put(fnr, diskresjonskode));
     }
 
-    private void put(String fnr, Diskresjonskode diskresjonskode) {
+    public void put(String fnr, Diskresjonskode diskresjonskode) {
         cache.put(fnr, diskresjonskode);
     }
 
