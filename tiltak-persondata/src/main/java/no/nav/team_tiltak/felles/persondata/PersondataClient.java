@@ -48,12 +48,12 @@ public class PersondataClient {
     }
 
     public Optional<Diskresjonskode> hentDiskresjonskode(String fnr) {
-        log.info("Henter diskresjonskode fra PDL");
+        log.debug("Henter diskresjonskode fra PDL");
 
         Optional<Diskresjonskode> diskresjonskodeCacheOpt = diskresjonskodeCache.get(fnr);
 
         if (diskresjonskodeCacheOpt.isPresent()) {
-            log.info("Fant diskresjonskode fra PDL i cache");
+            log.debug("Fant diskresjonskode fra PDL i cache");
             return diskresjonskodeCacheOpt;
         }
 
@@ -90,7 +90,7 @@ public class PersondataClient {
     }
 
     public <T>Map<T, Optional<Diskresjonskode>> hentDiskresjonskoder(Set<String> fnrSet, Function<String, T> mapper) {
-        log.info("Henter {} diskresjonskoder fra PDL", fnrSet.size());
+        log.debug("Henter {} diskresjonskoder fra PDL", fnrSet.size());
 
         if (fnrSet.isEmpty()) {
             return Collections.emptyMap();
@@ -106,7 +106,7 @@ public class PersondataClient {
 
 
         if (fnrSomIkkeFinnesICache.isEmpty()) {
-            log.info(
+            log.debug(
                 "Fant {} diskresjonskoder fra PDL i cache",
                 diskresjonskoderFraCache.size()
             );
@@ -128,12 +128,12 @@ public class PersondataClient {
             ));
 
         if (diskresjonskoderFraCache.isEmpty()) {
-            log.info(
+            log.debug(
                 "{} diskresjonskoder hentet fra PDL",
                 diskresjonskoderOptFraPdl.size()
             );
         } else {
-            log.info(
+            log.debug(
                 "Fant {} diskresjonskoder i cache og {} ble hentet fra PDL",
                 diskresjonskoderFraCache.size(),
                 diskresjonskoderOptFraPdl.size()
@@ -147,17 +147,17 @@ public class PersondataClient {
     }
 
     public Optional<String> hentGjeldendeAktorId(String fnr) {
-        log.info("Henter aktør-id fra PDL");
+        log.debug("Henter aktør-id fra PDL");
         return pdlClient.hentPersondata(fnr).flatMap(PdlResponse::utledGjeldendeIdent);
     }
 
     public Optional<String> hentGeografiskTilknytning(String fnr) {
-        log.info("Henter geografisk tilknytning fra PDL");
+        log.debug("Henter geografisk tilknytning fra PDL");
         return pdlClient.hentPersondata(fnr).flatMap(PdlResponse::utledGeoLokasjon);
     }
 
     public Optional<Navn> hentNavn(String fnr) {
-        log.info("Henter navn fra PDL");
+        log.debug("Henter navn fra PDL");
         return pdlClient.hentPersondata(fnr).flatMap(PdlResponse::utledNavn);
     }
 
