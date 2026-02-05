@@ -63,7 +63,7 @@ public class PdlClient {
     public Optional<PdlResponse> hentPersondata(String fnr) {
         Optional<PdlResponse> cached = Optional.ofNullable(pdlResponseCache.getIfPresent(fnr));
         if (cached.isPresent()) {
-            log.info("Fant persondata fra PDL i cache");
+            log.debug("Fant persondata fra PDL i cache");
             return cached;
         }
 
@@ -74,7 +74,7 @@ public class PdlClient {
 
         Optional<PdlResponse> pdlResponseOpt = post(baseUrl, pdlRequest, PdlResponse.class);
         pdlResponseOpt.ifPresent(Response -> pdlResponseCache.put(fnr, Response));
-        log.info(
+        log.debug(
             pdlResponseOpt
                 .map(response -> "Persondata hentet fra PDL")
                 .orElse("Svar fra PDL var tomt")
