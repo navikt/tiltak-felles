@@ -16,7 +16,7 @@
     <caffeine.version>3.2.0</caffeine.version>
     <rest.version>3.2025.03.27_12.42-0c31c6a57bd5</rest.version>
     <slf4j-api.version>2.0.13</slf4j-api.version>
-    <jackson-databind.version>2.17.1</jackson-databind.version>
+    <jackson-databind.version>2.18.6</jackson-databind.version>
     <commons-io.version>2.18.0</commons-io.version>
     <junit-jupiter.version>5.13.0-M2</junit-jupiter.version>
     <mockito-core.version>5.16.1</mockito-core.version>
