@@ -112,7 +112,7 @@ public class PdlClient {
                 throw new RuntimeException("Feil ved kall til PDL", e);
             }
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Feil ved serialisering av PDL request", e);
+            throw new RuntimeException("Feil ved serialisering av PDL request");
         }
     }
 }
