@@ -96,9 +96,11 @@ public class PdlClient {
                 .build();
 
             try (Response response = httpClient.newCall(request).execute()) {
-                if (!response.isSuccessful() || response.body() == null) {
-                    log.warn("Ingen respons fra PDL");
-                    return Optional.empty();
+                if (!response.isSuccessful()) {
+                    throw new RuntimeException("Feil ved kall til PDL: " + response.code() + " - " + response.message());
+                }
+                if (response.body() == null) {
+                    throw new RuntimeException("Feil ved kall til PDL: Response body var null");
                 }
                 String body = response.body().string();
                 Optional<R> responseOpt = Optional.ofNullable(
@@ -107,12 +109,10 @@ public class PdlClient {
                 log.debug("Respons fra PDL: {}", body);
                 return responseOpt;
             } catch (IOException e) {
-                log.error("Feil fra PDL", e);
-                return Optional.empty();
+                throw new RuntimeException("Feil ved kall til PDL", e);
             }
         } catch (JsonProcessingException e) {
-            log.error("Feil ved tolking av json fra PDL", e);
-            return Optional.empty();
+            throw new RuntimeException("Feil ved serialisering av PDL request");
         }
     }
 }
