@@ -14,14 +14,25 @@
   <properties>
     <java.version>21</java.version>
     <caffeine.version>3.2.0</caffeine.version>
-    <rest.version>3.2026.04.08_08.37-229807cc181a</rest.version>
+    <rest.version>4.2026.04.24_05.25-cab3c16705f7</rest.version>
     <slf4j-api.version>2.0.13</slf4j-api.version>
     <jackson-databind.version>2.21.2</jackson-databind.version>
     <commons-io.version>2.18.0</commons-io.version>
-    <junit-jupiter.version>5.13.0-M2</junit-jupiter.version>
-    <mockito-core.version>5.16.1</mockito-core.version>
+    <junit-jupiter.version>6.0.1</junit-jupiter.version>
+    <mockito-core.version>5.23.0</mockito-core.version>
     <assertj-core.version>4.0.0-M1</assertj-core.version>
+    <spring-boot.version>4.0.0-RC2</spring-boot.version>
+    <mockwebserver.version>5.3.2</mockwebserver.version>
   </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
   <dependencies>
     <dependency>
@@ -71,6 +82,18 @@
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>${assertj-core.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <version>${spring-boot.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>mockwebserver</artifactId>
+      <version>${mockwebserver.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
