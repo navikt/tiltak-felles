@@ -1,4 +1,4 @@
-name: Bygg og deploy
+name: Release Maven package
 
 on:
   workflow_dispatch:
@@ -7,14 +7,13 @@ on:
       - 'main'
 
 jobs:
-  bygg-og-deploy:
+  release:
     name: Bygg og deploy
+    if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
       packages: write
-      id-token: write
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,7 +25,7 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: 'maven'
-      - name: Deploy release
+      - name: Release package
         run: mvn -B -Drevision="${{ env.VERSION }}" source:jar deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
