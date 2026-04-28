@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Integrasjonstest som verifiserer at PersondataClient fungerer i et Spring Boot-miljø
@@ -144,11 +145,21 @@ class PersondataClientSpringIntegrationTest {
     @Test
     void hentDiskresjonskode_returnerer_empty_naar_pdl_svarer_tomt() {
         mockWebServer.enqueue(new MockResponse()
-            .setResponseCode(500));
+            .setResponseCode(204));
 
         Optional<Diskresjonskode> diskresjonskode = persondataClient.hentDiskresjonskode("44444444444");
 
         assertThat(diskresjonskode).isEmpty();
+    }
+
+    @Test
+    void hentDiskresjonskode_kaster_exception_naar_pdl_svarer_med_feilstatus() {
+        mockWebServer.enqueue(new MockResponse()
+            .setResponseCode(500));
+
+        assertThatThrownBy(() -> persondataClient.hentDiskresjonskode("55555555555"))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Feil ved kall til PDL: 500");
     }
 
     @SpringBootConfiguration

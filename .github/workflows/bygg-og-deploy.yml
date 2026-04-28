@@ -7,7 +7,7 @@ on:
       - 'main'
 
 jobs:
-  release:
+  bygg-og-deploy:
     name: Bygg og deploy
     if: github.ref == 'refs/heads/main'
     permissions:
