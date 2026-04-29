@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.team_tiltak.felles.persondata.cache.PdlResponseCache;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlRequest;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlResponse;
+import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlResponseMedAdresse;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlResponseBolk;
 import no.nav.team_tiltak.felles.persondata.utils.ResourceUtil;
 import okhttp3.MediaType;
@@ -22,6 +23,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
+
 public class PdlClient {
     private static final Logger log = LoggerFactory.getLogger(PdlClient.class);
 
@@ -29,6 +33,7 @@ public class PdlClient {
     private final PdlResponseCache pdlResponseCache;
     private final String baseUrl;
     private final String hentPersondataQuery;
+    private final String hentPersonMedAdressedataQuery;
     private final String hentPersonBolkQuery;
     private final Supplier<String> tokenProvider;
     private final ObjectMapper objectMapper = new ObjectMapper()
@@ -42,6 +47,22 @@ public class PdlClient {
         this.pdlResponseCache = new PdlResponseCache();
         this.hentPersonBolkQuery = ResourceUtil.getResourceAsString(this, "/pdl/hentPersonBolk.graphql");
         this.hentPersondataQuery = ResourceUtil.getResourceAsString(this, "/pdl/hentPersondata.graphql");
+        this.hentPersonMedAdressedataQuery = ResourceUtil.getResourceAsString(this, "/pdl/hentPersonMedAdressedata.graphql");
+    }
+
+    public Optional<PdlResponseMedAdresse> hentPersonMedAdresse(final String fnr) {
+        PdlRequest<PdlRequest.Variables> pdlRequest = new PdlRequest<>(
+            hentPersonMedAdressedataQuery,
+            new PdlRequest.Variables(fnr)
+        );
+
+        Optional<PdlResponseMedAdresse> pdlResponseOpt = post(baseUrl, pdlRequest, PdlResponseMedAdresse.class);
+        log.debug(
+            pdlResponseOpt
+                .map(response -> "Persondata med adresse hentet fra PDL")
+                .orElse("Svar fra PDL var tomt")
+        );
+        return pdlResponseOpt;
     }
 
     public Optional<PdlResponseBolk> hentPersonBolk(Set<String> fnr) {

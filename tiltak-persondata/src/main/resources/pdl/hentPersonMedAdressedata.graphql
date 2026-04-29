@@ -1,0 +1,249 @@
+query($ident: ID!){
+  hentPerson(ident: $ident) {
+    adressebeskyttelse(historikk: false) {
+      gradering
+    }
+
+    doedsfall {
+      doedsdato
+    }
+
+    navn(historikk: false) {
+      fornavn
+      mellomnavn
+      etternavn
+      forkortetNavn
+      gyldigFraOgMed
+      metadata {
+        master
+        endringer {
+          type
+          registrert
+        }
+      }
+    }
+
+    kontaktadresse(historikk: false) {
+      gyldigFraOgMed
+      gyldigTilOgMed
+      type
+      coAdressenavn
+
+      postboksadresse {
+        postbokseier
+        postboks
+        postnummer
+      }
+
+      vegadresse {
+        matrikkelId
+        husnummer
+        husbokstav
+        bruksenhetsnummer
+        adressenavn
+        kommunenummer
+        bydelsnummer
+        tilleggsnavn
+        postnummer
+      }
+
+      postadresseIFrittFormat {
+        adresselinje1
+        adresselinje2
+        adresselinje3
+        postnummer
+      }
+
+      utenlandskAdresse {
+        adressenavnNummer
+        bygningEtasjeLeilighet
+        postboksNummerNavn
+        postkode
+        bySted
+        regionDistriktOmraade
+        landkode
+      }
+
+      utenlandskAdresseIFrittFormat {
+        adresselinje1
+        adresselinje2
+        adresselinje3
+        postkode
+        byEllerStedsnavn
+        landkode
+      }
+
+      metadata {
+        master
+        endringer {
+          type
+          registrert
+          registrertAv
+          systemkilde
+          kilde
+        }
+        historisk
+      }
+    }
+
+    oppholdsadresse(historikk: false) {
+      gyldigFraOgMed
+      gyldigTilOgMed
+      coAdressenavn
+
+      utenlandskAdresse {
+        adressenavnNummer
+        bygningEtasjeLeilighet
+        postboksNummerNavn
+        postkode
+        bySted
+        regionDistriktOmraade
+        landkode
+      }
+
+      vegadresse {
+        matrikkelId
+        husnummer
+        husbokstav
+        bruksenhetsnummer
+        adressenavn
+        kommunenummer
+        bydelsnummer
+        tilleggsnavn
+        postnummer
+      }
+
+      metadata {
+        master
+        endringer {
+          type
+          registrert
+        }
+      }
+
+      matrikkeladresse {
+        matrikkelId
+        bruksenhetsnummer
+        tilleggsnavn
+        postnummer
+        kommunenummer
+      }
+
+      oppholdAnnetSted
+
+      metadata {
+        master
+      }
+    }
+
+    kontaktinformasjonForDoedsbo(historikk: false) {
+      skifteform
+      attestutstedelsesdato
+
+      personSomKontakt {
+        foedselsdato
+        personnavn {
+          fornavn
+          mellomnavn
+          etternavn
+        }
+        identifikasjonsnummer
+      }
+
+      advokatSomKontakt {
+        personnavn {
+          fornavn
+          mellomnavn
+          etternavn
+        }
+        organisasjonsnavn
+        organisasjonsnummer
+      }
+
+      organisasjonSomKontakt {
+        kontaktperson {
+          fornavn
+          mellomnavn
+          etternavn
+        }
+        organisasjonsnavn
+        organisasjonsnummer
+      }
+
+      adresse {
+        adresselinje1
+        adresselinje2
+        poststedsnavn
+        postnummer
+        landkode
+      }
+
+      metadata {
+        master
+      }
+    }
+
+    folkeregisteridentifikator(historikk: false) {
+      identifikasjonsnummer
+      type
+      status
+    }
+
+    bostedsadresse(historikk: false) {
+      angittFlyttedato
+      gyldigFraOgMed
+      gyldigTilOgMed
+      coAdressenavn
+
+      vegadresse {
+        matrikkelId
+        husnummer
+        husbokstav
+        bruksenhetsnummer
+        adressenavn
+        kommunenummer
+        bydelsnummer
+        tilleggsnavn
+        postnummer
+      }
+
+      utenlandskAdresse {
+        adressenavnNummer
+        bygningEtasjeLeilighet
+        postboksNummerNavn
+        postkode
+        bySted
+        regionDistriktOmraade
+        landkode
+      }
+
+      matrikkeladresse {
+        matrikkelId
+        bruksenhetsnummer
+        tilleggsnavn
+        postnummer
+        kommunenummer
+      }
+
+      ukjentBosted {
+        bostedskommune
+      }
+
+      metadata {
+        master
+        endringer {
+          type
+          registrert
+        }
+      }
+    }
+
+    folkeregisterpersonstatus(historikk: false) {
+      status
+      forenkletStatus
+      folkeregistermetadata {
+        kilde
+      }
+    }
+  }
+}

@@ -7,6 +7,7 @@ import no.nav.team_tiltak.felles.persondata.pdl.domene.HentGeografiskTilknytning
 import no.nav.team_tiltak.felles.persondata.pdl.domene.HentPerson;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.Navn;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlResponse;
+import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlResponseMedAdresse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,7 @@ class PersondataClientTest {
     private static final String USPESIFISERT_GRADERT_PERSON = "18076641842";
     private static final String PERSON_FINNES_IKKE = "24080687881";
     private static final String DONALD_DUCK = "00000000000";
+    private static final String PERSON_MED_ADRESSE = "11111111111";
 
     private PersondataClient persondataClient;
 
@@ -77,6 +79,30 @@ class PersondataClientTest {
                 null
             )))
         );
+
+
+        Optional<PdlResponseMedAdresse> responseMedAdresse = Optional.of(
+            new PdlResponseMedAdresse(new PdlResponseMedAdresse.Data(
+            new PdlResponseMedAdresse.HentPersonMedAdresse(
+                List.of(new Adressebeskyttelse(Diskresjonskode.UGRADERT)),
+                null,
+                List.of(new PdlResponseMedAdresse.NavnMedMetadata(
+                    "Donald",
+                    null,
+                    "Duck",
+                    "Donald Duck",
+                    "2024-01-01",
+                    null
+                )),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+        )));
+        when(pdlClient.hentPersonMedAdresse(PERSON_MED_ADRESSE)).thenReturn(responseMedAdresse);
     }
 
     @Test
@@ -145,6 +171,18 @@ class PersondataClientTest {
     @Test
     public void henterGeoTilhørighet() {
         assertThat(persondataClient.hentGeografiskTilknytning(DONALD_DUCK).orElse(null)).isEqualTo("030104");
+    }
+
+    @Test
+    public void hentPersonMedAdresse__returnerer_adresserespons_hvis_person_finnes() {
+        assertThat(persondataClient.hentPersonMedAdresse(PERSON_MED_ADRESSE))
+            .flatMap(PdlResponseMedAdresse::utledNavn)
+            .hasValue(new Navn("Donald", null, "Duck"));
+    }
+
+    @Test
+    public void hentPersonMedAdresse__tom_hvis_person_ikke_finnes() {
+        assertThat(persondataClient.hentPersonMedAdresse(PERSON_FINNES_IKKE)).isEmpty();
     }
 
 }

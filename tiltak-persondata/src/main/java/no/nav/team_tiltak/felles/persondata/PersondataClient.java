@@ -6,6 +6,7 @@ import no.nav.team_tiltak.felles.persondata.pdl.PdlClient;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.Diskresjonskode;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.Navn;
 import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlResponse;
+import no.nav.team_tiltak.felles.persondata.pdl.domene.PdlResponseMedAdresse;
 import no.nav.team_tiltak.felles.persondata.utils.MapUtils;
 import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
@@ -159,6 +160,11 @@ public class PersondataClient {
     public Optional<Navn> hentNavn(String fnr) {
         log.debug("Henter navn fra PDL");
         return pdlClient.hentPersondata(fnr).flatMap(PdlResponse::utledNavn);
+    }
+
+    public Optional<PdlResponseMedAdresse> hentPersonMedAdresse(String fnr) {
+        log.debug("Henter persondata med adresse fra PDL");
+        return pdlClient.hentPersonMedAdresse(fnr);
     }
 
 }
