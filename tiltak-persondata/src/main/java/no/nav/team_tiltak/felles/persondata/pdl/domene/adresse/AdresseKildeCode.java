@@ -1,0 +1,11 @@
+package no.nav.team_tiltak.felles.persondata.pdl.domene.adresse;
+
+public enum AdresseKildeCode {
+	BOSTEDSADRESSE,
+	OPPHOLDSADRESSE,
+	KONTAKTADRESSE,
+	DELTBOSTED,
+	KONTAKTINFORMASJONFORDØDSBO,
+	ENHETPOSTADRESSE,
+	ENHETFORRETNINGSADRESSE
+}
