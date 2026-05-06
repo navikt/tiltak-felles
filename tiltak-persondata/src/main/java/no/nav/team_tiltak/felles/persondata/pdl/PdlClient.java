@@ -23,9 +23,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
-
 public class PdlClient {
     private static final Logger log = LoggerFactory.getLogger(PdlClient.class);
 
