@@ -3,6 +3,9 @@ package no.nav.team_tiltak.felles.persondata.pdl.domene;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * https://pdl-docs.ansatt.nav.no/ekstern/index.html#_hvilken_adresse_b%C3%B8r_man_bruke
+ * */
 public record PdlResponseMedAdresse(Data data) {
     public record Data(HentPersonMedAdresse hentPerson) { }
 

@@ -162,6 +162,7 @@ public class PersondataClient {
         return pdlClient.hentPersondata(fnr).flatMap(PdlResponse::utledNavn);
     }
 
+    //https://pdl-docs.ansatt.nav.no/ekstern/index.html#_hvilken_adresse_b%C3%B8r_man_bruke
     public Optional<PdlResponseMedAdresse> hentPersonMedAdresse(String fnr) {
         log.debug("Henter persondata med adresse fra PDL");
         return pdlClient.hentPersonMedAdresse(fnr);
