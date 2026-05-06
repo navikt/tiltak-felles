@@ -118,9 +118,12 @@ public class PdlClient {
                     throw new RuntimeException("Feil ved kall til PDL: " + response.code() + " - " + response.message());
                 }
                 if (response.body() == null) {
-                    throw new RuntimeException("Feil ved kall til PDL: Response body var null");
+                    return Optional.empty();
                 }
                 String body = response.body().string();
+                if (body.isBlank()) {
+                    return Optional.empty();
+                }
                 Optional<R> responseOpt = Optional.ofNullable(
                     objectMapper.readValue(body, responseType)
                 );
