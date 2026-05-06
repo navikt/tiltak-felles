@@ -175,15 +175,11 @@ public class PersondataClient {
      * Adresser til post
      * Dersom formålet er å sende ut noe i post til bruker, vil vi anbefale følgende prioritering:
      *
-     * - Kontaktadresse med master PDL
-     *
-     * - Kontaktadresse fra Freg med nyeste registreringsdato (det er mulig med to)
-     *
-     * - Oppholdsadresse med master PDL
-     *
-     * - Oppholdsadresse med master Freg (Ikke aktuell om den kun inneholder oppholdAnnetSted)
-     *
-     *  - Bostedsadresse
+     * 1. Kontaktadresse med master PDL
+     * 2. Kontaktadresse fra Freg med nyeste registreringsdato (det er mulig med to)
+     * 3. Oppholdsadresse med master PDL
+     * 4. Oppholdsadresse med master Freg (Ikke aktuell om den kun inneholder oppholdAnnetSted)
+     * 5. Bostedsadresse
      *
      * NB! Dersom personen har en utenlandsk bostedsadresse som er nyere enn den adressen som velges ved prioriteringen ovenfor her,
      * anbefaler vi at bostedsadressen benyttes. Utenlandsk bostedsadresse har ikke alltid en dato i gyldigFraOgMed,
