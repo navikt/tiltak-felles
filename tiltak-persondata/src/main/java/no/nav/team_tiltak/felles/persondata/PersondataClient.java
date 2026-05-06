@@ -162,7 +162,35 @@ public class PersondataClient {
         return pdlClient.hentPersondata(fnr).flatMap(PdlResponse::utledNavn);
     }
 
-    //https://pdl-docs.ansatt.nav.no/ekstern/index.html#_hvilken_adresse_b%C3%B8r_man_bruke
+    /**
+     * Adresser brukes til flere ulike formål. Man bør derfor sette seg inn i dokumentasjonen om adresser før man velger
+     * hvilke adresser man vil hente. Hvor man er bosatt og hvor man oppholder seg vil være relevant i mange vurderinger og saksbehandling.
+     * Da er andre adressetyper viktigere enn kontaktadressen, som er mest aktuell ved utsendelse av post.
+     * Når en adresse ble registrert og hvem som registrerte den kan også ha betydning for hvilken adresse man skal velge.
+     * For noen formål er også master og kilde avgjørende for valg av adresse.
+     *
+     * Siden det er ulike formål og behov i etaten er det ikke hensiktsmessig å ha en prioritert adresse som skal brukes av alle i alle sammenhenger.
+     * Selv om det er mulig å ha opptil seks adresser på samme person, vil det være uvanlig at man har flere enn to eller tre. Og flertallet av Navs brukere vil kun ha bostedsadresse.
+     *
+     * Adresser til post
+     * Dersom formålet er å sende ut noe i post til bruker, vil vi anbefale følgende prioritering:
+     *
+     * - Kontaktadresse med master PDL
+     *
+     * - Kontaktadresse fra Freg med nyeste registreringsdato (det er mulig med to)
+     *
+     * - Oppholdsadresse med master PDL
+     *
+     * - Oppholdsadresse med master Freg (Ikke aktuell om den kun inneholder oppholdAnnetSted)
+     *
+     *  - Bostedsadresse
+     *
+     * NB! Dersom personen har en utenlandsk bostedsadresse som er nyere enn den adressen som velges ved prioriteringen ovenfor her,
+     * anbefaler vi at bostedsadressen benyttes. Utenlandsk bostedsadresse har ikke alltid en dato i gyldigFraOgMed,
+     * da kan man bruke dato i metadata registrert for å sjekke hvilken adresse som er sist registrert.
+     *
+     * https://pdl-docs.ansatt.nav.no/ekstern/index.html#_hvilken_adresse_b%C3%B8r_man_bruke
+     * */
     public Optional<PdlResponseMedAdresse> hentPersonMedAdresse(String fnr) {
         log.debug("Henter persondata med adresse fra PDL");
         return pdlClient.hentPersonMedAdresse(fnr);
